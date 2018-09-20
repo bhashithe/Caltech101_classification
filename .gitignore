@@ -1,0 +1,5 @@
+images/
+
+#ignore al swap files
+*.swp
+__pycache__
