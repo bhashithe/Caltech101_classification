@@ -1,5 +1,7 @@
 images/
+image_label/
 
 #ignore al swap files
 *.swp
+*.gz
 __pycache__
