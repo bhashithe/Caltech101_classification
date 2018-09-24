@@ -1,7 +1,7 @@
 import os
 import torch
 from torch.utils.data import Dataset
-import cv2
+from PIL import Image
 
 class Caltech101Data(Dataset):
 	""" Caltech101 dataset """
@@ -17,7 +17,7 @@ class Caltech101Data(Dataset):
 	def __getitem__(self, idx):
 		print(self.image_list[idx])
 		image_path = os.path.join(self.path,self.image_list[idx])
-		image = cv2.imread(image_path)
+		image = Image.open(image_path)
 		label = self.image_list[idx].split('_image')[0]
 
 		if self.transform:
