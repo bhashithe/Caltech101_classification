@@ -12,7 +12,7 @@ class Trainer():
 		self.loss_function = loss_function
 		self.model = model
 
-	def train(self,epochs):
+	def train(self,epochs, loss=None):
 		for epoch in range(epochs):
 			running_loss = 0.0
 			for batch_idx, data in enumerate(self.loader,0):
@@ -31,6 +31,11 @@ class Trainer():
 				if batch_idx%2000==0:
 					print('[%d, %5d] loss: %.3f' % (epoch+1, batch_idx+1, running_loss/2000))
 					running_loss = 0.0
+
+				# save the model state in each beatch so that it is possible to resume training later
+				torch.save({'epoch': epoch, 'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optimizer.state_dict(), 'loss': loss}, 'model_checkpoint.mdl')
 		print('finished training')
+		# we can save the whole model
+		torch.save(self.model, 'model_complete.mdl')
 
 

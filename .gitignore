@@ -6,3 +6,6 @@ __pycache__
 *.swp
 *.gz
 101_ObjectCategories.tar.gz
+
+#sont track models
+*.mdl
