@@ -1,7 +1,8 @@
 images/
 image_label/
+__pycache__
 
 #ignore al swap files
 *.swp
 *.gz
-__pycache__
+101_ObjectCategories.tar.gz

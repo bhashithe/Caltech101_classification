@@ -1,7 +1,9 @@
 import os
 import torch
 from torch.utils.data import Dataset
+from torchvision import transforms
 from PIL import Image
+import joblib
 
 class Caltech101Data(Dataset):
 	""" Caltech101 dataset """
@@ -18,10 +20,15 @@ class Caltech101Data(Dataset):
 		print(self.image_list[idx])
 		image_path = os.path.join(self.path,self.image_list[idx])
 		image = Image.open(image_path)
+		image = image.convert('RGB')
 		label = self.image_list[idx].split('_image')[0]
-
+		int_label = joblib.load('labels')
+		label = int_label.index(label)
+		
+		extra_transforms= transforms.Compose([transforms.ToTensor()])
 		if self.transform:
-			self.transform(image)
+			image = self.transform(image)
+		image = extra_transforms(image)
 		sample = {'image': image, 'label': label}
 		
 		return sample
