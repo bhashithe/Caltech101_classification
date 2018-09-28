@@ -13,11 +13,13 @@ There is a 6000 image data set which we should apply an object detection problem
 
 [+] Create training interface
 
+[-] Introduce validation while training
+
 [-] Create the interface for saving and loading models using checkpoints
 
 [-] Train the Caltech101 set
 
-[-] Data labeled
+[-] Test the model with predictions, reruns and hyper-parametrs
 
 # Issues
 

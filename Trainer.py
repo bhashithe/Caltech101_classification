@@ -4,20 +4,23 @@ from classifier import Classifier
 from torch.utils.data import DataLoader
 
 class Trainer():
-	def __init__(self, loader, data, optimizer, loss_function, model):
+	def __init__(self, loader, data, optimizer, loss_function, model, device):
 		self.model = model
 		self.loader = loader
 		self.data = data
 		self.optimizer = optimizer
 		self.loss_function = loss_function
-		self.model = model
+		self.device = device
+		self.model = model.to(self.device)
 
 	def train(self,epochs, loss=None):
 		for epoch in range(epochs):
 			running_loss = 0.0
 			for batch_idx, data in enumerate(self.loader,0):
+				print(self.device)
 				inputs, labels = data['image'], data['label']
-
+				inputs = inputs.to(self.device)
+				labels = labels.to(self.device)
 				self.optimizer.zero_grad()
 
 				print("labels: ", type(labels))
