@@ -25,8 +25,9 @@ loss = checkpoint['loss']
 loader = DataLoader(cd, batch_size=20, shuffle=True)
 trainer = Trainer(loader, cd, optimizer, loss_function, model, device)
 
+
 def main():
-	trainer.train(2)
+	trainer.train_with_validation(10, size(cd))
 
 if __name__ == '__main__':
 	main()
