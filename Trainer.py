@@ -2,9 +2,11 @@ import torch
 from torch.optim import Adam
 from classifier import Classifier
 from torch.utils.data import DataLoader
+import time
+import copy
 
 class Trainer():
-	def __init__(self, loader, data, optimizer, loss_function, model, device):
+	def __init__(self, loader, data, optimizer, loss_function, scheduler, model, device):
 		self.model = model
 		self.loader = loader
 		self.data = data
@@ -12,6 +14,64 @@ class Trainer():
 		self.loss_function = loss_function
 		self.device = device
 		self.model = model.to(self.device)
+		self.scheduler = scheduler
+
+	def train_with_validation(self, epochs, dataset_size):
+		'''
+		adapted from https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
+		'''
+		since = time.time()
+
+		model_wts = copy.deepcopy(self.model.state_dict())
+		best_acc = 0.00
+		
+		for epoch in epochs:
+			print('Epoch : {}/{}'.format(epoch, epochs-1))
+			print('-'*10)
+
+			for phase in ["train","eval"]:
+				if phase=="train":
+					self.model.train()
+					self.scheduler.step()
+				else:
+					model.eval()
+		
+				running_loss = 0.0
+				running_corrects = 0
+
+				for images, labels in self.loader[phase]:
+					images.to(self.device)
+					labels.to(self.device)
+					
+					with torch.set_grad_enabled(phase=True):
+						outputs = model(images)
+						_, preds = torch.max(output, 1)
+						loss = self.loss_function(outputs, labels)
+
+						if phase == "train":
+							loss.backward()
+							optimizer.step()
+					running_loss += loss.item() * images.size(0)
+					running_corrects += torch.sum(preds == labels.data)
+
+			epoch_loss = running_loss/dataset_size[phase]
+			epoch_corrects = running_corrects.double()/dataset_size[phase]
+
+			print("{} epoch_loss: {:.3f} epoch_acc: {:.3f}".format(phase, epoch_loss, epoch_corrects))
+
+			if phase == "eval" and epoch_corrects > best_acc:
+				best_acc = epoch_corrects
+				best_model_wts = copy.deepcopy(self.model.state_dict())
+
+			print()
+
+		time_elapsed = time.time() - since
+		print("training completed in: {:.f}m {:.f}s".format(time_elapsed//60, time%60))
+
+		print("Best accuracy: {:.4f}".format(best_acc))
+
+		model.load_state_dict(best_model_wts)
+		return model
 
 	def train(self,epochs, loss=None):
 		for epoch in range(epochs):
