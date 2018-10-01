@@ -33,8 +33,8 @@ class Classifier(nn.Module):
 		print(self.network)
 		self.fc = nn.Linear(in_features=(781456), out_features=num_classes)
 
-	def forward(self, input):
-		output = self.network(input)
+	def forward(self, input_images):
+		output = self.network(input_images)
 		output = output.reshape(output.size(0), -1)
 		output = self.fc(output)
 
