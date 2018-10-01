@@ -1,20 +1,23 @@
 import torch
-from torch.optim import Adam
+from torch.optim import Adam, lr_scheduler
 from classifier import Classifier
 from torch.utils.data import DataLoader
 import time
 import copy
 
 class Trainer():
-	def __init__(self, loader, data, optimizer, loss_function, scheduler, model, device):
+	def __init__(self, loader, optimizer, loss_function, scheduler, model, device):
 		self.model = model
 		self.loader = loader
-		self.data = data
 		self.optimizer = optimizer
 		self.loss_function = loss_function
 		self.device = device
 		self.model = model.to(self.device)
 		self.scheduler = scheduler
+
+		if device == torch.device('cuda:0'):
+			print('model in gpu')
+			self.model.cuda()
 
 	def train_with_validation(self, epochs, dataset_size):
 		'''
@@ -25,7 +28,7 @@ class Trainer():
 		model_wts = copy.deepcopy(self.model.state_dict())
 		best_acc = 0.00
 		
-		for epoch in epochs:
+		for epoch in range(epochs):
 			print('Epoch : {}/{}'.format(epoch, epochs-1))
 			print('-'*10)
 
@@ -39,20 +42,23 @@ class Trainer():
 				running_loss = 0.0
 				running_corrects = 0
 
-				for images, labels in self.loader[phase]:
-					images.to(self.device)
-					labels.to(self.device)
+				for batch_idx, data in enumerate(self.loader[phase],0):
+					images, labels = data['image'], data['label']
+					images = images.to(self.device)
+					labels = labels.to(self.device)
 					
-					with torch.set_grad_enabled(phase=True):
-						outputs = model(images)
-						_, preds = torch.max(output, 1)
+					with torch.set_grad_enabled(phase == 'train'):
+						outputs = self.model(images)
+						_, preds = torch.max(outputs, 1)
 						loss = self.loss_function(outputs, labels)
 
 						if phase == "train":
 							loss.backward()
-							optimizer.step()
+							self.optimizer.step()
 					running_loss += loss.item() * images.size(0)
 					running_corrects += torch.sum(preds == labels.data)
+
+					torch.save({'epoch': epoch, 'model_state_dict': self.model.state_dict(), 'optimizer_state_dict': self.optimizer.state_dict(), 'loss': loss}, 'model_checkpoint.mdl')
 
 			epoch_loss = running_loss/dataset_size[phase]
 			epoch_corrects = running_corrects.double()/dataset_size[phase]
